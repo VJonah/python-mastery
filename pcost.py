@@ -1,7 +1,7 @@
 # pcost.py
 
 
-path = '../Data/portfolio.dat'
+path = 'Data/portfolio.dat'
 
 def portfolio_cost(filename):
     total_cost = 0.0
@@ -16,4 +16,6 @@ def portfolio_cost(filename):
                 print(f"Reason: {e}")
     return total_cost
 
-print(portfolio_cost('../Data/portfolio3.dat'))
+
+if __name__ == '__main__':
+    print(portfolio_cost('Data/portfolio.dat'))
