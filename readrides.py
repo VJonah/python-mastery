@@ -1,7 +1,7 @@
 # readrides.py
 
 import csv
-from collections import namedtuple
+from collections import namedtuple, Counter
 
 
 class RideRecord:
@@ -95,6 +95,60 @@ def read_rides_as_class_with_slots(filename):
             record = RideRecordS(row[0],row[1],row[2],int(row[3]))
             records.append(record)
     return records
+
+def count_routes(rows:list):
+    '''
+    Takes a dictionary of rows and returns the number of bus routes.
+    '''
+    if not isinstance(rows[0],dict):
+        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    return len({record['route'] for record in rows})
+
+def number_of_passengers(rows:dict,route:str,date:str):
+    '''
+    Returns the number of passengers on a specific route on a specific date.
+    '''
+    if not isinstance(rows[0],dict):
+        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    passengers = Counter()
+    for record in rows:
+        passengers[record['route'],record['date']] += record['rides']
+    return passengers[route,date]
+
+def total_rides(rows:dict):
+    '''
+    Returns the total number of passengers on a specific route.
+    '''
+    if not isinstance(rows[0],dict):
+        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    rides = Counter()
+    for record in rows:
+        rides[record['route']] += record['rides']
+    return rides
+
+def greatest_increase(rows:dict,from_year='2001',to_year='2011'):
+    '''
+    Returns the 5 routes with the greatest increase between 2 years.
+    '''
+    if not isinstance(rows[0],dict):
+        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    elif not isinstance(from_year,str) or not isinstance(to_year,str):
+        raise TypeError(f"Function expects the from_year and to_year keyword arguments to be strings. Got: {type(from_year)} and {type(to_year)}")
+    from_year_rides = Counter()
+    to_year_rides = Counter()
+    for record in rows:
+        record_year = record['date'].split('/')[-1]
+        if  record_year == from_year:
+            from_year_rides[record['route']] += record['rides']
+        elif record_year == to_year:
+            to_year_rides[record['route']] += record['rides']
+    rides_delta = to_year_rides - from_year_rides
+    return rides_delta.most_common(5)
+
+
+
+
+
 if __name__ == '__main__':
     import tracemalloc
     tracemalloc.start()
@@ -114,8 +168,9 @@ if __name__ == '__main__':
     #named_tuple_results = tracemalloc.get_traced_memory()
     #print('Named Tuple Memory Use: Current %d, Peak %d' % named_tuple_results)
     #tracemalloc.reset_peak()
-    rows = read_rides_as_class_with_slots('Data/ctabus.csv')
-    class_with_slots_results = tracemalloc.get_traced_memory()
-    print('Class with Slots Memory Use: Current %d, Peak %d' % class_with_slots_results)
+    #rows = read_rides_as_class_with_slots('Data/ctabus.csv')
+    #class_with_slots_results = tracemalloc.get_traced_memory()
+    #print('Class with Slots Memory Use: Current %d, Peak %d' % class_with_slots_results)
 
 # class with __slots__ takes it!
+rows = read_rides_as_dictionary('Data/ctabus.csv')
