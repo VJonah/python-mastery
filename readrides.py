@@ -38,7 +38,7 @@ def read_rides_as_tuples(filename):
             records.append(record)
     return records
 
-def read_rides_as_dictionary(filename):
+def read_rides_as_dicts(filename):
     '''
     Read the bus ride data as a list of dictionaries
     '''
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     #tuple_results = tracemalloc.get_traced_memory()
     #print('Tuple Memory Use: Current %d, Peak %d' % tuple_results)
     #tracemalloc.reset_peak()
-    #rows = read_rides_as_dictionary('Data/ctabus.csv')
+    #rows = read_rides_as_dicts('Data/ctabus.csv')
     #dictionary_results = tracemalloc.get_traced_memory()
     #print('Dictionary Memory Use: Current %d, Peak %d' % dictionary_results)
     #tracemalloc.reset_peak()
@@ -173,4 +173,4 @@ if __name__ == '__main__':
     #print('Class with Slots Memory Use: Current %d, Peak %d' % class_with_slots_results)
 
 # class with __slots__ takes it!
-rows = read_rides_as_dictionary('Data/ctabus.csv')
+#rows = read_rides_as_dicts('Data/ctabus.csv')
