@@ -1,5 +1,6 @@
 # readrides.py
 
+import collections
 import csv
 from collections import namedtuple, Counter
 
@@ -17,7 +18,39 @@ class RideRecordS: # the __slots__ version
         self.date = date
         self.daytype = daytype
         self.rides = rides
-#
+
+class RideData(collections.abc.Sequence):
+    def __init__(self):
+        self.routes = [] # Columns
+        self.dates = []
+        self.daytypes = []
+        self.numrides = []
+
+    def __len__(self):
+       # All lists assumed to have the same length
+       return len(self.routes)
+
+    def __getitem__(self, key):
+        if isinstance(key,slice):
+            r = RideData()
+            # we unpack the tuple returned by the indices method
+            for i in range(*key.indices(len(self))):
+                r.append(self[i])
+            return r
+        return {
+            'route': self.routes[key],
+            'date': self.dates[key],
+            'daytype': self.daytypes[key],
+            'rides': self.numrides[key]
+        }
+
+    def append(self,d):
+        self.routes.append(d['route'])
+        self.dates.append(d['date'])
+        self.daytypes.append(d['daytype'])
+        self.numrides.append(d['rides'])
+
+
 # the named tuple version
 RideRecordNT = namedtuple('RideRecordT',['route','date','daytype','rides'])
 
@@ -96,20 +129,39 @@ def read_rides_as_class_with_slots(filename):
             records.append(record)
     return records
 
+def read_rides_as_columns(filename):
+    '''
+    Read the bus ride data into 4 lists, representing columns
+    '''
+    records = RideData()
+    with open(filename) as f:
+        rows = csv.reader(f)
+        headings = next(rows)     # Skip headers
+        for row in rows:
+            record = {
+                'route': row[0],
+                'date': row[1],
+                'daytype': row[2],
+                'rides': int(row[3]),
+            }
+            records.append(record)
+    return records
+
+
 def count_routes(rows:list):
     '''
-    Takes a dictionary of rows and returns the number of bus routes.
+    Takes a list of row dictionaries and returns the number of bus routes.
     '''
-    if not isinstance(rows[0],dict):
-        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    #if not isinstance(rows[0],dict):
+        #raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
     return len({record['route'] for record in rows})
 
 def number_of_passengers(rows:dict,route:str,date:str):
     '''
     Returns the number of passengers on a specific route on a specific date.
     '''
-    if not isinstance(rows[0],dict):
-        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    #if not isinstance(rows[0],dict):
+        #raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
     passengers = Counter()
     for record in rows:
         passengers[record['route'],record['date']] += record['rides']
@@ -119,8 +171,8 @@ def total_rides(rows:dict):
     '''
     Returns the total number of passengers on a specific route.
     '''
-    if not isinstance(rows[0],dict):
-        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    #if not isinstance(rows[0],dict):
+        #raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
     rides = Counter()
     for record in rows:
         rides[record['route']] += record['rides']
@@ -130,10 +182,10 @@ def greatest_increase(rows:dict,from_year='2001',to_year='2011'):
     '''
     Returns the 5 routes with the greatest increase between 2 years.
     '''
-    if not isinstance(rows[0],dict):
-        raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
-    elif not isinstance(from_year,str) or not isinstance(to_year,str):
-        raise TypeError(f"Function expects the from_year and to_year keyword arguments to be strings. Got: {type(from_year)} and {type(to_year)}")
+    #if not isinstance(rows[0],dict):
+        #raise TypeError(f"Function expects a list of dicts as argument. Got: {type(rows)}")
+    #elif not isinstance(from_year,str) or not isinstance(to_year,str):
+        #raise TypeError(f"Function expects the from_year and to_year keyword arguments to be strings. Got: {type(from_year)} and {type(to_year)}")
     from_year_rides = Counter()
     to_year_rides = Counter()
     for record in rows:
