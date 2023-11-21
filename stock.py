@@ -2,10 +2,16 @@
 
 
 class Stock:
+    types = (str, int, float) # a class variable
     def __init__(self,name,shares,price):
         self.name = name
         self.shares = shares
         self.price = price
+
+    @classmethod
+    def from_row(cls,row):
+        values = [func(val) for func, val in zip(cls.types, row)]
+        return cls(*values)
 
     def cost(self):
         '''Returns the cost of the stock.'''
@@ -16,21 +22,6 @@ class Stock:
         if nshares > self.shares:
             raise ValueError("Too few available shares to sell!")
         self.shares -= nshares
-
-def read_portfolio(file_path):
-    '''
-    Reads a CSV file of stock data into a list of Stocks.
-    '''
-    import csv
-    stocks = []
-    with open(file_path) as f:
-        rows = csv.reader(f)
-        headers = next(rows)
-        for row in rows:
-            name, shares, price = row
-            s = Stock(name,int(shares),float(price))
-            stocks.append(s)
-    return stocks
 
 def print_portfolio(portfolio):
     '''
