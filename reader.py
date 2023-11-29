@@ -1,6 +1,7 @@
 # reader.py
 
 import csv
+from abc import ABC, abstractmethod
 
 
 class DataCollection:
@@ -32,23 +33,56 @@ class DataCollection:
             getattr(self,header).append(value)
 
 
-def read_csv_as_dicts(file_path,coltypes):
+class CSVParser(ABC):
+    def parse(self, filename):
+        records = []
+        with open(filename) as f:
+            rows = csv.reader(f)
+            headers = next(rows)
+            for row in rows:
+                record = self.make_record(headers, row)
+                records.append(record)
+        return records
+
+    @abstractmethod
+    def make_record(self, headers, row):
+        pass
+
+class DictCSVParser(CSVParser):
+    def __init__(self, types):
+        self.types = types
+
+    def make_record(self, headers, row):
+        return {name: func(val) for name, func, val in zip(headers, self.types, row) }
+
+class InstanceCSVParser(CSVParser):
+    def __init__(self, cls):
+        self.cls = cls
+
+    def make_record(self, headers, row):
+        return self.cls.from_row(row)
+
+def read_csv_as_dicts(filename,coltypes):
     '''
     Parses a csv into a list of dictionaries with a specific
     type conversion mapping for each column.
     '''
-    f = open(file_path)
-    rows = csv.reader(f)
-    headers = next(rows)
-    return [{ name:func(val) for name, func, val in zip(headers,coltypes,row)} for row in rows]
+    parser = DictCSVParser(coltypes)
+    return parser.parse(filename)
 
+def read_csv_as_instances(filename, cls):
+    '''
+    Read a CSV file into a list of instances
+    '''
+    parser = InstanceCSVParser(cls)
+    return parser.parse(filename)
 
-def read_csv_as_columns(file_path,types=None):
+def read_csv_as_columns(filename,types=None):
     '''
     General purpose CSV parser that stores data in a DataCollection object.
     '''
     assert type(types) != type(None), "Got no types for 'read_csv_as_columsn'"
-    f = open(file_path)
+    f = open(filename)
     rows = csv.reader(f)
     headers = next(rows)
     dc = DataCollection(headers)
@@ -56,15 +90,3 @@ def read_csv_as_columns(file_path,types=None):
         record = { name:func(val) for name, func, val in zip(headers,types,row) }
         dc.append(record)
     return dc
-
-def read_csv_as_instances(filename, cls):
-    '''
-    Read a CSV file into a list of instances
-    '''
-    records = []
-    with open(filename) as f:
-        rows = csv.reader(f)
-        headers = next(rows)
-        for row in rows:
-            records.append(cls.from_row(row))
-    return records

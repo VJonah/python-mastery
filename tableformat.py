@@ -1,12 +1,15 @@
 # tableformat.py
 
+from abc import ABC, abstractmethod
 
-class TableFormatter:
+class TableFormatter(ABC):
+    @abstractmethod
     def headings(self, headers):
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     def row(self, rowdata):
-        raise NotImplementedError()
+        pass
 
 
 class TextTableFormatter(TableFormatter):
@@ -43,6 +46,8 @@ def print_table(records, fields, formatter):
     '''
     Make a nicely formatted table showing object attributes.
     '''
+    if not isinstance(formatter,TableFormatter):
+        raise TypeError('Exepcted a TableFormatter')
     formatter.headings(fields)
     for r in records:
         rowdata = [getattr(r, fieldname) for fieldname in fields]
