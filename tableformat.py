@@ -12,6 +12,17 @@ class TableFormatter(ABC):
         pass
 
 
+class ColumnFormatMixin:
+    formats = [] # class variable example!
+
+    def row(self, rowdata):
+        rowdata = [(fmt % d) for fmt, d in zip(self.formats, rowdata)]
+        super().row(rowdata)
+
+class UpperHeadersMixin:
+    def headings(self, headers):
+        super().headings([h.upper() for h in headers])
+
 class TextTableFormatter(TableFormatter):
     def headings(self, headers):
         print(' '.join('%10s' % h for h in headers))
@@ -32,15 +43,32 @@ class HTMLTableFormatter(TableFormatter):
     def row(self, rowdata):
         print('<tr>',' '.join(f"<td>{d}</td>" for d in rowdata), '</tr>')
 
-def create_formatter(fmt):
+def create_formatter(fmt, column_formats=None, upper_headers=False):
+    '''
+    Creates a custom formatter by mixing in the right Mixin classes.
+    '''
     if fmt == 'text':
-        return TextTableFormatter()
+        formatter_cls = TextTableFormatter
     elif fmt == 'csv':
-        return CSVTableFormatter()
+        formatter_cls = CSVTableFormatter
     elif fmt == 'html':
-        return HTMLTableFormatter()
+        formatter_cls = HTMLTableFormatter
     else:
         raise RuntimeError(f'no formatter in format: {fmt} exists.')
+
+    # you probably don't need to do the combination of mixins (ie: no more than 1 mixin)
+    if column_formats != None:
+        if upper_headers == True:
+            class formatter_cls(ColumnFormatMixin, UpperHeadersMixin, formatter_cls):
+                formats = column_formats
+        else:
+            class formatter_cls(ColumnFormatMixin, formatter_cls):
+                formats = column_formats
+    elif upper_headers == True:
+        class formatter_cls(UpperHeadersMixin, formatter_cls):
+            pass
+
+    return formatter_cls()
 
 def print_table(records, fields, formatter):
     '''
