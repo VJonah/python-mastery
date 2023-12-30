@@ -2,21 +2,21 @@
 import csv
 from typing import List
 
-def read_csv_as_dicts(filename: str, types: List[type], headers: List[str] = None) -> List[dict]:
+def read_csv_as_dicts(filename: str, types: List[type], *, headers: List[str] = None) -> List[dict]:
     '''
     Read CSV data into a list of dictionaries with optional type conversion
     '''
-    with open(filename, 'rt') as file:
+    with open(filename) as file:
         return csv_as_dicts(file, types, headers=headers)
 
-def read_csv_as_instances(filename: str, cls: type, headers: List[str] = None) -> List[type]:
+def read_csv_as_instances(filename: str, cls: type, *,  headers: List[str] = None) -> List[type]:
     '''
     Read CSV data into a list of instances
     '''
-    with open(filename, 'rt') as file:
+    with open(filename) as file:
         return csv_as_instances(file, cls, headers=headers)
 
-def csv_as_dicts(lines: iter, types: List[type], headers: List[str] = None) -> List[dict]:
+def csv_as_dicts(lines: iter, types: List[type], *, headers: List[str] = None) -> List[dict]:
     '''
     Parse CSV lines of an iterable object into a list of dictionary records.
     '''
@@ -29,7 +29,7 @@ def csv_as_dicts(lines: iter, types: List[type], headers: List[str] = None) -> L
         records.append(record)
     return records
 
-def csv_as_instances(lines:iter, cls: type, headers: List[str] = None) -> List[type]:
+def csv_as_instances(lines:iter, cls: type, *, headers: List[str] = None) -> List[type]:
     '''
     Parse CSV lines of an iterable object into a list of class instances.
     '''
