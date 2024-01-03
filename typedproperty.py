@@ -1,61 +1,29 @@
 # typedproperty.py
 
-def typedproperty(name, expected_type):
-    private_name = '_' + name
+def typedproperty(expected_type):
+    #private_name = '_' + name
 
-    @property
+    @my_property
     def value(self):
-        return getattr(self, private_name)
+        return getattr(self, value.private_name)
+
 
     @value.setter
     def value(self, val):
         if not isinstance(val, expected_type):
             raise TypeError(f'Expected {expected_type}')
-        setattr(self, private_name, val)
+        setattr(self, value.private_name, val)
 
     return value
 
-def String(name):
-    private_name = '_' + name
+# thanks to https://github.com/dabeaz-course/python-mastery/issues/35
+class my_property(property):
+    def __set_name__(self, cls, name):
+        self.private_name = '_' + name
 
-    @property
-    def value(self):
-        return getattr(self, private_name)
-
-    @value.setter
-    def value(self, val):
-        if not isinstance(val, str):
-            raise TypeError('Expected string')
-        setattr(self, private_name, val)
-
-    return value
-
-def Integer(name):
-    private_name = '_' + name
-
-    @property
-    def value(self):
-        return getattr(self, private_name)
-
-    @value.setter
-    def value(self, val):
-        if not isinstance(val, int):
-            raise TypeError('Expected integer')
-        setattr(self, private_name, val)
-
-    return value
-
-def Float(name):
-    private_name = '_' + name
-
-    @property
-    def value(self):
-        return getattr(self, private_name)
-
-    @value.setter
-    def value(self, val):
-        if not isinstance(val, float):
-            raise TypeError('Expected float')
-        setattr(self, private_name, val)
-
-    return value
+String = lambda : typedproperty(str)
+Integer = lambda : typedproperty(int)
+Float = lambda : typedproperty(float)
+#String  = lambda name: typedproperty(name,str)
+#Integer  = lambda name: typedproperty(name,int)
+#Float  = lambda name: typedproperty(name,float)
