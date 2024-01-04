@@ -1,6 +1,8 @@
 # reader.py
 import csv
 from typing import List
+import logging
+log = logging.getLogger(__name__)
 
 def read_csv_as_dicts(filename: str, types: List[type], *, headers: List[str] = None) -> List[dict]:
     '''
@@ -41,4 +43,13 @@ def convert_csv(lines:iter, conversion_func, *, headers=None) -> list:
     rows = csv.reader(lines)
     if headers is None:
         headers = next(rows)
-    return list(map(lambda row: conversion_func(headers, row), rows))
+
+    records = []
+    for i,row in enumerate(rows,start=1):
+        try:
+            records.append(conversion_func(headers, row))
+        except ValueError as e:
+            log.warning(f'Bad row: {row}')
+            log.debug(f'Reason: {e}')
+
+    return records
