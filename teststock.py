@@ -17,7 +17,7 @@ class TestStock(unittest.TestCase):
 
     def test_cost(self):
         s = Stock('GOOG', 100, 490.1)
-        self.assertEqual(s.cost, 100 * 490.1)
+        self.assertEqual(s.cost, 49010.0)
 
     def test_sell(self):
         s = Stock('GOOG', 100, 490.1)
@@ -33,7 +33,7 @@ class TestStock(unittest.TestCase):
 
     def test_repr(self):
         s = Stock('GOOG', 100, 490.1)
-        self.assertEqual(s.__repr__(), "Stock('GOOG', 100, 490.1)")
+        self.assertEqual(repr(s), "Stock('GOOG', 100, 490.1)")
 
     def test_eq(self):
         s1 = Stock('GOOG', 100, 490.1)
