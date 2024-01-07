@@ -1,6 +1,7 @@
 # structure.py
 
 import sys
+import inspect
 
 class Structure:
     _fields = () # why is this necessary? In case we forget to initialise one in the subclass?
@@ -12,8 +13,12 @@ class Structure:
         for name, val in locs.items():
             setattr(self, name, val)
 
+    @classmethod
+    def set_fields(cls):
+        cls._fields = tuple(inspect.signature(cls.__init__).parameters)[1:] # exclude first 'self' arg
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join(repr(getattr(self,name)) for name in self._fields)})"
+        return f"{self.__class__.__name__}({', '.join(repr(getattr(self, name)) for name in self._fields)})"
 
     def __setattr__(self, name, value):
         if not name.startswith('_') and name not in self._fields:
