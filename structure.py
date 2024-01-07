@@ -15,7 +15,8 @@ class Structure:
 
     @classmethod
     def set_fields(cls):
-        cls._fields = tuple(inspect.signature(cls.__init__).parameters)[1:] # exclude first 'self' arg
+        sig = inspect.signature(cls)
+        cls._fields = tuple(sig.parameters)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join(repr(getattr(self, name)) for name in self._fields)})"
