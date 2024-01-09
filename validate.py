@@ -11,7 +11,12 @@ class ValidatedFunction:
         bound = sig.bind(*args,**kwargs)
         for name, value in bound.arguments.items():
             self.func.__annotations__[name].check(value)
+
         result = self.func(*args,**kwargs)
+
+        if self.func.__annotations['return']:
+            self.func.__annotations['return'].check(result)
+
         return result
 
 class Validator:
