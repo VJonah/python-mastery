@@ -1,7 +1,6 @@
 # structure.py
 
 import sys
-import inspect
 
 class Structure:
     _fields = () # why is this necessary? In case we forget to initialise one in the subclass?
