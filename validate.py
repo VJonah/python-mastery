@@ -14,10 +14,38 @@ class ValidatedFunction:
 
         result = self.func(*args,**kwargs)
 
-        if self.func.__annotations['return']:
-            self.func.__annotations['return'].check(result)
+        if self.func.__annotations__['return']:
+            self.func.__annotations__['return'].check(result)
 
         return result
+
+def validated(func):
+    def wrapper(*args,**kwargs):
+        sig = inspect.signature(func)
+        bound = sig.bind(*args,**kwargs)
+        annotations = dict(func.__annotations__)
+        return_check = annotations.pop('return', None)
+        exceptions = []
+        for name, value in annotations.items():
+            try:
+                value.check(bound.arguments[name])
+            except TypeError as e:
+                exceptions.append(f'{name}: {e}')
+
+        if exceptions:
+            raise TypeError('Bad Arguments\n\t%s' % '\n\t'.join(exceptions))
+
+        result = func(*args,**kwargs)
+
+        if return_check:
+            try:
+                return_check.check(result)
+            except TypeError as e:
+                raise TypeError(f'Bad return: {e}')
+        return result
+
+    return wrapper
+
 
 class Validator:
 
@@ -77,33 +105,16 @@ class NonEmptyString(String, NonEmpty):
     pass
 
 class Stock:
-    name = String()
-    shares = PositiveInteger()
-    price = PositiveFloat()
-
-    def __init__(self,name,shares,price):
+    def __init__(self, name, shares, price):
         self.name = name
         self.shares = shares
         self.price = price
 
-    def __repr__(self):
-        return f"Stock({repr(self.name)}, {self.shares}, {self.price})"
-
-    def __eq__(self, other):
-        return isinstance(other, Stock) and ((self.name, self.shares, self.price) ==
-                                           (other.name, other.shares, other.price))
-    @classmethod
-    def from_row(cls,row):
-        values = [func(val) for func, val in zip(cls._types, row)]
-        return cls(*values)
-
     @property
     def cost(self):
-        '''Returns the cost of the stock.'''
         return self.shares * self.price
 
-    def sell(self,nshares):
-        '''Sells a certain number of shares.'''
-        if nshares > self.shares:
-            raise ValueError("Too few available shares to sell!")
+    @validated
+    def sell(self, nshares:PositiveInteger):
         self.shares -= nshares
+s = Stock('GOOG',23,32.4)
