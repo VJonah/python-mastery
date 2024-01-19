@@ -12,5 +12,7 @@ def logformat(fmt):
         return wrapper
     return logged
 
-def logged(func):
-    return logformat('Calling {func.__name__}')(func)
+#def logged(func):
+#   return logformat('Calling {func.__name__}')(func)
+
+logged = logformat('Calling {func.__name__}')
