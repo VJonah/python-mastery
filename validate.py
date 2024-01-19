@@ -31,7 +31,7 @@ def validated(func):
         for name, value in annotations.items():
             try:
                 value.check(bound.arguments[name])
-            except TypeError as e:
+            except (TypeError, ValueError) as e:
                 exceptions.append(f'{name}: {e}')
 
         if exceptions:
@@ -117,7 +117,7 @@ class Positive(Validator):
     @classmethod
     def check(cls, value):
         if value < 0:
-            raise ValueError('Expected >= 0')
+            raise ValueError('must be >= 0')
         return super().check(value)
 
 class NonEmpty(Validator):
