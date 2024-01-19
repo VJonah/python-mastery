@@ -1,6 +1,7 @@
 # validate.py
 
 import inspect
+from functools import wraps
 
 class ValidatedFunction:
     def __init__(self, func):
@@ -20,6 +21,7 @@ class ValidatedFunction:
         return result
 
 def validated(func):
+    @wraps(func)
     def wrapper(*args,**kwargs):
         sig = inspect.signature(func)
         bound = sig.bind(*args,**kwargs)
@@ -45,6 +47,36 @@ def validated(func):
         return result
 
     return wrapper
+
+def enforce(**annotations):
+    def validated(func):
+        @wraps(func)
+        def wrapper(*args,**kwargs):
+            sig = inspect.signature(func)
+            bound = sig.bind(*args,**kwargs)
+            return_check = annotations.pop('return_', None)
+            exceptions = []
+            for name, value in annotations.items():
+                try:
+                    value.check(bound.arguments[name])
+                except TypeError as e:
+                    exceptions.append(f'{name}: {e}')
+
+            if exceptions:
+                raise TypeError('Bad Arguments\n\t%s' % '\n\t'.join(exceptions))
+
+            result = func(*args,**kwargs)
+
+            if return_check:
+                try:
+                    return_check.check(result)
+                except TypeError as e:
+                    raise TypeError(f'Bad return: {e}')
+
+            return result
+        return wrapper
+    return validated
+
 
 
 class Validator:
