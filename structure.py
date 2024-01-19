@@ -40,13 +40,19 @@ class Structure:
 # which behaves as expected! Lesson: always consider differing to super()!
 
 def validate_attributes(cls):
+    '''
+    Class decorator that scans a class definition for Validators
+    and builds a _fields variable that captures their definition order.
+    '''
     validators = []
     for name, val in vars(cls).items():
         if isinstance(val, Validator):
             validators.append(val)
-        if callable(val) and hasattr(val,'__annotations__') and val.__annotations__:
+
+        # Apply validated decorator to any callable with annotations
+        elif callable(val) and val.__annotations__:
             setattr(cls, name, validated(val))
-    cls._fields = [val.name for val in validators]
-    cls._types = [val.expected_type for val in validators if hasattr(val,'expected_type')]
+    cls._fields = tuple(val.name for val in validators)
+    cls._types = tuple(getattr(val, 'expected_type', lambda x : x) for val in validators)
     cls.create_init()
     return cls
