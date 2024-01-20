@@ -1,7 +1,6 @@
 # stock.py
 
-from structure import Structure, validate_attributes
-from validate import String, PositiveInteger, PositiveFloat
+from structure import Structure
 
 class Stock(Structure):
     name = String()

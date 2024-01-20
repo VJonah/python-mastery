@@ -88,6 +88,12 @@ class Validator:
     def __set_name__(self, cls, name):
         self.name = name
 
+    # Collect all derived classes into a dict
+    validators = {}
+    @classmethod
+    def __init_subclass__(cls):
+        cls.validators[cls.__name__] = cls
+
     @classmethod
     def check(cls, value):
         return value
