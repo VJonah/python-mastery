@@ -101,17 +101,17 @@ class Typed(Validator):
     @classmethod
     def check(cls, value):
         if not isinstance(value, cls.expected_type):
-            raise TypeError(f'Expected {cls.expected_type}')
+            raise TypeError(f'expected {cls.expected_type}')
         return super().check(value)
 
-class Integer(Typed):
-    expected_type = int
+_typed_classes = [
+    ('Integer', int),
+    ('Float', float),
+    ('String', str) ]
 
-class Float(Typed):
-    expected_type = float
+globals().update((name, type(name, (Typed,), {'expected_type':ty}))
+                 for name, ty in _typed_classes)
 
-class String(Typed):
-    expected_type = str
 
 class Positive(Validator):
     @classmethod
@@ -149,4 +149,3 @@ class Stock:
     @validated
     def sell(self, nshares:PositiveInteger):
         self.shares -= nshares
-s = Stock('GOOG',23,32.4)

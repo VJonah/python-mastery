@@ -56,3 +56,7 @@ def validate_attributes(cls):
     cls._types = tuple(getattr(val, 'expected_type', lambda x : x) for val in validators)
     cls.create_init()
     return cls
+
+def typed_structure(clsname, **validators):
+    cls = type(clsname, (Structure,), validators)
+    return cls
