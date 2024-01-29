@@ -45,6 +45,13 @@ class Structure(metaclass=StructureMeta):
             raise AttributeError(f'No attribute {name}')
         super().__setattr__(name, value)
 
+    def __iter__(self):
+        for name in self._fields:
+            yield getattr(self, name)
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and tuple(self) == tuple(other)
+
 # a note on the __setattr__ method
 # it works because the method resolution order (MRO) of a
 # child to Structure will use the __setattr__ of builtins.object
