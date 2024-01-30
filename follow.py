@@ -3,15 +3,19 @@
 import os
 import time
 
-def follow(file_path: str):
-    f = open(file_path)
-    f.seek(0,os.SEEK_END) # Move file pointer 0 bytes from end of file
-    while True:
-        line = f.readline()
-        if line == '':
-            time.sleep(0.1) # sleep briefly and retry
-        else:
-            yield line
+def follow(filename: str):
+    try:
+        with open(filename, 'r') as f:
+            f.seek(0,os.SEEK_END) # Move file pointer 0 bytes from end of file
+            while True:
+                line = f.readline()
+                if line == '':
+                    time.sleep(0.1) # sleep briefly and retry
+                    continue
+                yield line
+    except GeneratorExit:
+        print('Following Done')
+
 
 #while True:
     #fields = line.split(',')
