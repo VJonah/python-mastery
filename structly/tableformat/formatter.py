@@ -3,6 +3,13 @@
 from abc import ABC, abstractmethod
 
 class TableFormatter(ABC):
+    _formats = {}
+
+    @classmethod
+    def __init_subclass__(cls):
+        name = cls.__module__.split('.')[-1]
+        TableFormatter._formats[name] = cls
+
     @abstractmethod
     def headings(self, headers):
         pass
@@ -12,9 +19,6 @@ class TableFormatter(ABC):
         pass
 
 
-from .formats.text import TextTableFormatter
-from .formats.csv import CSVTableFormatter
-from .formats.html import HTMLTableFormatter
 
 class ColumnFormatMixin:
     formats = [] # class variable example!
@@ -27,18 +31,16 @@ class UpperHeadersMixin:
     def headings(self, headers):
         super().headings([h.upper() for h in headers])
 
-def create_formatter(fmt, column_formats=None, upper_headers=False):
+def create_formatter(name, column_formats=None, upper_headers=False):
     '''
     Creates a custom formatter by mixing in the right Mixin classes.
     '''
-    if fmt == 'text':
-        formatter_cls = TextTableFormatter
-    elif fmt == 'csv':
-        formatter_cls = CSVTableFormatter
-    elif fmt == 'html':
-        formatter_cls = HTMLTableFormatter
-    else:
-        raise RuntimeError(f'no formatter in format: {fmt} exists.')
+    if name not in TableFormatter._formats:
+        __import__(f'{__package__}.formats.{name}')
+
+    formatter_cls = TableFormatter._formats.get(name)
+    if not formatter_cls:
+        raise RuntimeError('Unknown format %s' % name)
 
     # you probably don't need to do the combination of mixins (ie: no more than 1 mixin)
     if column_formats != None:
