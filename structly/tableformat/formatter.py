@@ -1,4 +1,4 @@
-# tableformat.py
+# tableformat/formatter.py
 
 from abc import ABC, abstractmethod
 
@@ -12,6 +12,10 @@ class TableFormatter(ABC):
         pass
 
 
+from .formats.text import TextTableFormatter
+from .formats.csv import CSVTableFormatter
+from .formats.html import HTMLTableFormatter
+
 class ColumnFormatMixin:
     formats = [] # class variable example!
 
@@ -22,26 +26,6 @@ class ColumnFormatMixin:
 class UpperHeadersMixin:
     def headings(self, headers):
         super().headings([h.upper() for h in headers])
-
-class TextTableFormatter(TableFormatter):
-    def headings(self, headers):
-        print(' '.join('%10s' % h for h in headers))
-        print(('-'*10 + ' ') * len(headers))
-    def row(self, rowdata):
-        print(' '.join('%10s' % d for d in rowdata))
-
-class CSVTableFormatter(TableFormatter):
-    def headings(self, headers):
-        #print(','.join(str(h) for h in headers))
-        print(','.join(headers)) # since these are string s already
-    def row(self, rowdata):
-        print(','.join(str(d) for d in rowdata))
-
-class HTMLTableFormatter(TableFormatter):
-    def headings(self, headers):
-        print('<tr>',' '.join(f"<th>{h}</th>" for h in headers), '</tr>')
-    def row(self, rowdata):
-        print('<tr>',' '.join(f"<td>{d}</td>" for d in rowdata), '</tr>')
 
 def create_formatter(fmt, column_formats=None, upper_headers=False):
     '''

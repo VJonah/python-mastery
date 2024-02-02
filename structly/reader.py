@@ -4,6 +4,8 @@ from typing import List
 import logging
 log = logging.getLogger(__name__)
 
+__all__ = ['read_csv_as_dicts', 'read_csv_as_instances']
+
 def read_csv_as_dicts(filename: str, types: List[type], *, headers: List[str] = None) -> List[dict]:
     '''
     Read CSV data into a list of dictionaries with optional type conversion
